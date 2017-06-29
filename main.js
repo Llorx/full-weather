@@ -57,12 +57,12 @@ function start() {
         });
     });
 
-    /*Hurricanes((location) => {
+    Hurricanes((location) => {
         rtm.publish(channel, {
             type: "hurricane",
             location: location
         });
-    });*/
+    });
 
     SpaceData((data) => {
         rtm.publish(channel, {
