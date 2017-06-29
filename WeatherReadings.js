@@ -83,6 +83,10 @@ setInterval(() => {
 }, 6 * 60 * 60 * 1000);
 
 function getWeather(publish) {
+    if (!quadrants[currentQuadrant]) {
+        currentQuadrant = 0;
+    }
+    console.log(quadrants[currentQuadrant]);
     http.get("http://api.mesowest.net/v2/stations/latest?status=active&bbox=" + quadrants[currentQuadrant] + "&token=" + key, (res) => { // TODO, change -17 = -179
         var data = "";
         res.on("data", (c) => {
@@ -91,9 +95,13 @@ function getWeather(publish) {
         res.on("end", () => {
             try {
                 data = JSON.parse(data);
+                console.log(data.SUMMARY);
                 if (data.SUMMARY.RESPONSE_CODE == -1) { // No stations found for this request
                     // Remove the quadrant and reserve it to query it later, just in case new stations are added
                     reservedquadrants.push(quadrants.splice(currentQuadrant, 1)[0]);
+                    if (currentQuadrant >= quadrants.length) {
+                        currentQuadrant = 0;
+                    }
                     looptimeout = (30 * 60 * 1000) / quadrants.length;
                     return getWeather(publish);
                 } else {
@@ -103,6 +111,9 @@ function getWeather(publish) {
                 console.log(e);
             }
             currentQuadrant++;
+            if (currentQuadrant >= quadrants.length) {
+                currentQuadrant = 0;
+            }
             setTimeout(getWeather.bind(null, publish), looptimeout);
         });
     });
@@ -160,9 +171,9 @@ function processWeather(data, publish) {
                 name: station.NAME,
                 timezone: station.TIMEZONE,
                 coords: {
-                    lon: station.LONGITUDE,
-                    lat: station.LATITUDE,
-                    alt: station.ELEVATION
+                    lon: Number(station.LONGITUDE),
+                    lat: Number(station.LATITUDE),
+                    alt: Number(station.ELEVATION)
                 },
                 data: variables
             });
