@@ -83,7 +83,6 @@ setInterval(() => {
 }, 6 * 60 * 60 * 1000);
 
 function getWeather(publish) {
-    console.log("http://api.mesowest.net/v2/stations/latest?status=active&bbox=" + quadrants[currentQuadrant] + "&token=" + key);
     http.get("http://api.mesowest.net/v2/stations/latest?status=active&bbox=" + quadrants[currentQuadrant] + "&token=" + key, (res) => { // TODO, change -17 = -179
         var data = "";
         res.on("data", (c) => {

@@ -110,10 +110,12 @@ function processJSON(data, element, publish) {
             if (element.location) {
                 pdata.location = element.location
             }
-            element.headers.forEach((name) => {
-                pdata[name] = arr.shift();
-            });
-            publish(pdata);
+            if (arr.length > 0) {
+                element.headers.forEach((name) => {
+                    pdata[name] = arr.shift();
+                });
+                publish(pdata);
+            }
         }
     });
 }
@@ -122,23 +124,27 @@ function processTEXT(rl, element, publish) {
     rl.on("line", (line) => {
         if (line && line[0] != "#") {
             line = line.trim().split(/,?\s+/);
-            var id = line.slice(0, element.idsize || 6).join("_");
-            if (element.cache.indexOf(id) < 0) {
-                element.cache.push(id);
-                if (element.cache.length > 200) {
-                    element.cache.splice(0, 20);
+            if (line.lneght > 0) {
+                var id = line.slice(0, element.idsize || 6).join("_");
+                if (element.cache.indexOf(id) < 0) {
+                    element.cache.push(id);
+                    if (element.cache.length > 200) {
+                        element.cache.splice(0, 20);
+                    }
+                    line = line.slice(element.idsize || 6);
+                    var pdata = {
+                        type: element.type
+                    };
+                    if (element.location) {
+                        pdata.location = element.location
+                    }
+                    if (line.length > 0) {
+                        element.headers.forEach((name) => {
+                            pdata[name] = line.shift();
+                        });
+                        publish(pdata);
+                    }
                 }
-                line = line.slice(element.idsize || 6);
-                var pdata = {
-                    type: element.type
-                };
-                if (element.location) {
-                    pdata.location = element.location
-                }
-                element.headers.forEach((name) => {
-                    pdata[name] = line.shift();
-                });
-                publish(pdata);
             }
         }
     }).on("close", () => {
