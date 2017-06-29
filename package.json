@@ -1,0 +1,24 @@
+{
+    "name": "satori-full-weather",
+    "version": "0.0.1",
+    "description": "This will push weather updates and warnings from around the globe and space to the Satori full-weather channel",
+    "main": "main.js",
+    "devDependencies": {},
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Llorx/satori-full-weather.git"
+    },
+    "author": "Llorx",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Llorx/satori-full-weather/issues"
+    },
+    "homepage": "https://github.com/Llorx/satori-full-weather#readme",
+    "dependencies": {
+        "satori-sdk-js": "^1.0.1",
+        "ws": "^3.0.0"
+    }
+}
