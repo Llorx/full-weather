@@ -51,8 +51,20 @@ The data types that can be received are:
 - `xray_flux`. Properties: `short, long`.
 - `particle_electron_flux`. Properties: `particles_over_X_mev` (1, 5, 10, 30, 50, 100) `electrons_over_X_mev` (0_8, 2, 4).
 - `energetic_proton_flux`. Properties: `protons_X_to_Y_mev` (0_7-4, 4-9, 9-15, 15-40, 38-82, 84-200, 110-900, 350-420, 420-510, 510-700) `protons_over_700_mev`.
-- `aurora_hemispheric_power`. Without location. Properties: `north, south`.
 - `geomagnetic_components`. Properties: `hp, he, hn, total`.
+- `aurora_hemispheric_power`. Without location. Properties: `north, south`.
+
+The impact that can have on earth are:
+- [Climate](http://www.swpc.noaa.gov/impacts/space-weather-impacts-climate)
+- [HF Radio communications](http://www.swpc.noaa.gov/impacts/hf-radio-communications) and [Radio blackouts](http://www.swpc.noaa.gov/phenomena/solar-flares-radio-blackouts)
+- [GPS systems](http://www.swpc.noaa.gov/impacts/space-weather-and-gps-systems)
+- [Electric power transmission](http://www.swpc.noaa.gov/impacts/electric-power-transmission)
+- [Satellite drag](http://www.swpc.noaa.gov/impacts/satellite-drag)
+- [Satellite communications](http://www.swpc.noaa.gov/impacts/satellite-communications)
+
+And the phenomenas are:
+- [Aurora](http://www.swpc.noaa.gov/phenomena/aurora)
+- [CM Radio emissions](http://www.swpc.noaa.gov/phenomena/f107-cm-radio-emissions)
 
 ### Space alert
 Throws the alerts that the NOAA agency emits. They have usually 1 hour of potential impacts advanced prediction. Can be of any kind, like GPS satellite problems, FM radio signal drops, etc...
