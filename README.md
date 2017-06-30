@@ -126,7 +126,7 @@ The signature is:
 ```
 
 ### Atmospheric data
-Streams data from around 40k weather stations around the globe with a centenar of different variables.
+Streams data from around 20k weather stations around the globe.
 
 The signature is:
 
