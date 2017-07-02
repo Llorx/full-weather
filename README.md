@@ -136,13 +136,11 @@ The signature is:
     data: {
         id: "Station unique ID",
         name: "Station name",
-        timezone: "Station timezone",
+        timezone: "Station timezone", // Optional
         coords: {
             /* Station coords */
-            lon, lat
-            
-            /* Optional */
-            alt
+            lon, lat,
+            alt // Optional
         }
         data: {
             /* Variables updated from this station */

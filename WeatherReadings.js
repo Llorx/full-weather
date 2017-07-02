@@ -5,7 +5,7 @@ var mesowest = require("./credentials").mesowest.key;
 
 function run(publish) {
     getWeather(publish); // Openweather
-    //nextQuadrant(publish); // Mesowest
+    nextQuadrant(publish); // Mesowest
 }
 
 function getWeather(publish) {
