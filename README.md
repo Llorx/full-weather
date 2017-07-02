@@ -67,7 +67,7 @@ And the phenomenas are:
 - [CM Radio emissions](http://www.swpc.noaa.gov/phenomena/f107-cm-radio-emissions)
 
 ### Space alert
-Throws the alerts that the NOAA agency emits. They have usually 1 hour of potential impacts advanced prediction. Can be of any kind, like GPS satellite problems, FM radio signal drops, etc...
+Throws the alerts that the NOAA agency emits. They have usually 1 hour of potential impacts advanced prediction. Can be of any kind, like GPS satellite problems, HF radio signal drops, etc...
 
 The signature is:
 
