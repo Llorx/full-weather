@@ -1,8 +1,15 @@
 var http = require("http");
 
-var key = require("./credentials").openweather.key;
+var openweather = require("./credentials").openweather.key;
+var mesowest = require("./credentials").mesowest.key;
+
+function run(publish) {
+    getWeather(publish); // Openweather
+    //nextQuadrant(publish); // Mesowest
+}
+
 function getWeather(publish) {
-    http.get("http://api.openweathermap.org/data/2.5/box/city?bbox=-180,90,180,-90,20&&cluster=no&appid=" + key, (res) => {
+    http.get("http://api.openweathermap.org/data/2.5/box/city?bbox=-180,90,180,-90,20&&cluster=no&appid=" + openweather, (res) => {
         var data = "";
         res.on("data", (c) => {
             data += c;
@@ -26,17 +33,50 @@ function processWeather(data, publish) {
             /*if (previousList[w.id] != w.dt) {
                 previousList[w.id] = w.dt;*/
             topublish.push({
-                    id: w.id,
+                    id: "ow_" + w.id,
                     name: w.name,
                     coords: {
                         lon: w.coord.Lon,
                         lat: w.coord.Lat
                     },
-                    environment: w.main,
-                    wind: w.wind,
-                    rain_volume: w.rain || 0,
-                    snow_volume: w.snow || 0,
-                    clouds_coverage: (w.clouds && w.clouds.hasOwnProperty("today")) ? w.clouds.today : "unknown"
+                    variables: {
+                        air_temp: {
+                            value: w.main.temp,
+                            units: "Celsius"
+                        },
+                        air_tepressuremp: {
+                            value: w.main.pressure * 100,
+                            units: "Pascals"
+                        },
+                        relative_humidity: {
+                            value: w.main.humidity,
+                            unit: "%"
+                        },
+                        sea_level_pressure: w.main.hasOwnProperty("sea_level") ? {
+                            value: w.main.sea_level * 100,
+                            unit: "Pascals"
+                        } : undefined, // undefined is not serialized by JSON.stringify
+                        wind_speed: {
+                            value: w.wind.speed,
+                            unit: "m/s"
+                        },
+                        wind_direction: {
+                            value: w.wind.deg,
+                            unit: "Degrees"
+                        },
+                        wind_gust: {
+                            value: w.wind.gust,
+                            unit: "m/s"
+                        },
+                        precip_accum_three_hour: (w.rain && w.rain["3h"]) ? {
+                            value: w.rain["3h"],
+                            unit: "Millimeters"
+                        } : undefined, // undefined is not serialized by JSON.stringify
+                        snow_accum_three_hour: (w.snow && w.snow["3h"]) ? {
+                            value: w.snow["3h"],
+                            unit: "Millimeters"
+                        } : undefined, // undefined is not serialized by JSON.stringify
+                    }
                 });
             //}
         });
@@ -57,15 +97,14 @@ function processWeather(data, publish) {
 
 module.exports = getWeather;
 
-/*
 // USA only
 var key = require("./credentials").mesowest.key;
 // Divide the api calls by quadrants
 var quadrants = [];
+//var divisor = 1; // 1 quadrant
 //var divisor = 4; // 16 quadrants
 //var divisor = 10; // 100 quadrants
-//var divisor = 20; // 400 quadrants
-var divisor = 1; // 1 quadrant
+var divisor = 20; // 400 quadrants
 
 var lonmin = -180;
 var lonmax = 180;
@@ -113,7 +152,7 @@ var cachedQuadrants = [];
 
 function nextQuadrant(publish) {
     var quadrant = quadrants.shift(); // Remove from bottom stack
-    http.get("http://api.mesowest.net/v2/stations/latest?status=active&bbox=" + quadrant + "&token=" + key, (res) => {
+    http.get("http://api.mesowest.net/v2/stations/latest?status=active&bbox=" + quadrant + "&token=" + mesowest, (res) => {
         var data = "";
         res.on("data", (c) => {
             data += c;
@@ -129,7 +168,7 @@ function nextQuadrant(publish) {
                 return nextQuadrant(publish);
             } else {
                 if (data.STATION) {
-                    processWeather(data, publish);
+                    processQuadrant(data, publish);
                 } else {
                     nextQuadrant(publish);
                 }
@@ -143,7 +182,7 @@ var list = {};
 
 var processing = false;
 var processQeue = [];
-function processWeather(data, publish) {
+function processQuadrant(data, publish) {
     if (processing) {
         processQeue.push(data);
         return;
@@ -202,14 +241,15 @@ function processWeather(data, publish) {
                 }
                 if (Object.keys(variables).length > 0) {
                     topost.push({
-                        id: station.ID,
+                        id: "mw_" + station.ID,
                         name: station.NAME,
-                        timezone: station.TIMEZONE,
                         coords: {
                             lon: Number(station.LONGITUDE),
                             lat: Number(station.LATITUDE),
                             alt: Number(station.ELEVATION)
                         },
+
+                        timezone: station.TIMEZONE,
                         data: variables
                     });
                 }
@@ -225,19 +265,17 @@ function processWeather(data, publish) {
             publishStations(topost, timeoutPerStation, publish, () => {
                 processing = false;
                 if (processQeue.length > 0) {
-                    processWeather(processQeue.shift(), publish);
+                    processQuadrant(processQeue.shift(), publish);
                 }
             });
         }
     } else {
         processing = false;
         if (processQeue.length > 0) {
-            processWeather(processQeue.shift(), publish);
+            processQuadrant(processQeue.shift(), publish);
         }
     }
 }
-
-module.exports = nextQuadrant;*/
 
 function publishStations(stations, timeout, publish, end) {
     var interval = setInterval(() => {
@@ -266,3 +304,5 @@ function shuffle(array) {
         array[randomIndex] = temporaryValue;
     }
 }
+
+module.exports = run;

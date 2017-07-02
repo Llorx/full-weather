@@ -10,7 +10,6 @@ function getSpaceAlerts(publish) {
             try {
                 processSpaceAlerts(JSON.parse(data), publish);
             } catch (e) {
-                console.log(e);
             }
             setTimeout(getSpaceAlerts.bind(null, publish), 30000);
         });
