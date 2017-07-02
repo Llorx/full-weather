@@ -141,9 +141,6 @@ The signature is:
             /* Station coords */
             lon, lat
         }
-        data: {
-            /* Variables updated from this station */
-        }
         environment: {
             temp: "Temperature in Celsius",
             temp_min: "Minimum temperature",
