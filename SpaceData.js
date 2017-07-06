@@ -1,19 +1,19 @@
 var http = require("http");
 var readline = require("readline");
 
-var json = [{
+var files = [{
     type: "magnetic_fields",
     endpoint: "http://services.swpc.noaa.gov/products/solar-wind/mag-5-minute.json",
+    json: true,
     headers: ["bx", "by", "bz", "lon", "lat", "bt"],
     cache: []
 }, {
     type: "wind_plasma",
     endpoint: "http://services.swpc.noaa.gov/products/solar-wind/plasma-5-minute.json",
+    json: true,
     headers: ["density", "speed", "temperature"],
     cache: []
-}];
-
-var text = [{
+}, {
     type: "xray_flux",
     location: "W135",
     endpoint: "http://services.swpc.noaa.gov/text/goes-xray-flux-primary.txt",
@@ -69,8 +69,8 @@ var text = [{
     cache: []
 }];
 
-function getSpaceData(publish) {
-    json.forEach((element) => {
+function nextSpaceData(element, publish, callback) {
+    if (element.json) {
         http.get(element.endpoint, (res) => {
             var data = "";
             res.on("data", (c) => {
@@ -81,18 +81,35 @@ function getSpaceData(publish) {
                     processJSON(JSON.parse(data), element, publish);
                 } catch (e) {
                 }
+                callback();
             });
         });
-    });
-    text.forEach((element) => {
+    } else {
         http.get(element.endpoint, (res) => {
             var rl = readline.createInterface({
                 input: res
             });
-            processTEXT(rl, element, publish);
+            processTEXT(rl, element, publish, callback);
         });
-    });
-    setTimeout(getSpaceData.bind(null, publish), 25000);
+    }
+}
+
+function getSpaceData(publish) {
+    var started = Date.now();
+    var count = 0;
+    var next = function() {
+        if (count >= files.length) {
+            var dif = 30000 - (Date.now() - started); // Reload each 30 seconds from start
+            if (dif > 0) {
+                setTimeout(getSpaceData.bind(null, publish), dif);
+            } else {
+                getSpaceData(publish);
+            }
+        } else {
+            nextSpaceData(files[count++], publish, next);
+        }
+    };
+    next();
 }
 
 function processJSON(data, element, publish) {
@@ -120,34 +137,38 @@ function processJSON(data, element, publish) {
     });
 }
 
-function processTEXT(rl, element, publish) {
+function processTEXT(rl, element, publish, callback) {
     rl.on("line", (line) => {
-        if (line && line[0] != "#") {
-            line = line.trim().split(/,?\s+/);
-            if (line.lneght > 0) {
-                var id = line.slice(0, element.idsize || 6).join("_");
-                if (element.cache.indexOf(id) < 0) {
-                    element.cache.push(id);
-                    if (element.cache.length > 200) {
-                        element.cache.splice(0, 20);
-                    }
-                    line = line.slice(element.idsize || 6);
-                    var pdata = {
-                        type: element.type
-                    };
-                    if (element.location) {
-                        pdata.location = element.location
-                    }
-                    if (line.length > 0) {
-                        element.headers.forEach((name) => {
-                            pdata[name] = line.shift();
-                        });
-                        publish(pdata);
+        try {
+            if (line && line[0] != "#") {
+                line = line.trim().split(/,?\s+/);
+                if (line.length > 0) {
+                    var id = line.slice(0, element.idsize || 6).join("_");
+                    if (element.cache.indexOf(id) < 0) {
+                        element.cache.push(id);
+                        if (element.cache.length > 200) {
+                            element.cache.splice(0, 20);
+                        }
+                        line = line.slice(element.idsize || 6);
+                        var pdata = {
+                            type: element.type
+                        };
+                        if (element.location) {
+                            pdata.location = element.location
+                        }
+                        if (line.length > 0) {
+                            element.headers.forEach((name) => {
+                                pdata[name] = line.shift();
+                            });
+                            publish(pdata);
+                        }
                     }
                 }
             }
+        } catch (e) {
         }
     }).on("close", () => {
+        callback();
     }).on("error", () => {
     });
 }
