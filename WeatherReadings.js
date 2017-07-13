@@ -24,15 +24,15 @@ function getWeather(publish) {
     });
 }
 
-// Do not keep track of changes. Simply push them: var previousList = {};
+var previousList = {};
 
 function processWeather(data, publish) {
     var topublish = [];
     try {
         data.list.forEach((w) => {
-            /*if (previousList[w.id] != w.dt) {
-                previousList[w.id] = w.dt;*/
-            topublish.push({
+            if (previousList[w.id] != w.dt) {
+                previousList[w.id] = w.dt;
+                topublish.push({
                     id: "ow_" + w.id,
                     name: w.name,
                     coords: {
@@ -78,7 +78,7 @@ function processWeather(data, publish) {
                         } : undefined, // undefined is not serialized by JSON.stringify
                     }
                 });
-            //}
+            }
         });
     } catch (e) {
     }
@@ -86,8 +86,8 @@ function processWeather(data, publish) {
         // Shuffle to publish data all around the map instead of focusing on spots
         shuffle(topublish);
 
-        // Publish them until the next call in 10 minutes instead of pushing a big bulk
-        publishStations(topublish, (10 * 60 * 1000) / topublish.length, publish, () => {
+        // Publish them until the next call in 2 hours minutes instead of pushing a big bulk
+        publishStations(topublish, (2 * 60 * 60 * 1000) / topublish.length, publish, () => {
             getWeather(publish);
         });
     } else {
