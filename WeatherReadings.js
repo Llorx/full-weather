@@ -91,7 +91,9 @@ function processWeather(data, publish) {
             getWeather(publish);
         });
     } else {
-        getWeather(publish);
+        setTimeout(() => {
+            getWeather(publish);
+        }, (2 * 60 * 1000));
     }
 }
 

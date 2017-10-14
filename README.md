@@ -1,4 +1,4 @@
-*Detailed info for the [full-weather](https://www.satori.com/channels/full-weather) channel at [Satori.com](https://www.satori.com/).*
+*Detailed info for the [full-weather](https://www.satori.com/opendata/channels/full-weather) channel at [Satori.com](https://www.satori.com/).*
 
 ## What's this?
 This channel aggregates data from a lot of sources that could provide information about anything that can have a natural impact on the earth.
